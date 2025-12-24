@@ -13,6 +13,7 @@ func (h *Handler) CreateTask(w http.ResponseWriter, r *http.Request) {
 	var payload struct {
 		Title       string  `json:"title"`
 		Description *string `json:"description"`
+		GroupID     uint    `json:"group_id"`
 
 		DueTime *time.Time `json:"due_time"`
 	}
@@ -31,6 +32,7 @@ func (h *Handler) CreateTask(w http.ResponseWriter, r *http.Request) {
 	task := timelog.Task{
 		Title:       payload.Title,
 		Description: payload.Description,
+		GroupID:     payload.GroupID,
 		DueTime:     payload.DueTime,
 		CreatedTime: time.Now(),
 	}

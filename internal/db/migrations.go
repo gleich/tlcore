@@ -10,7 +10,8 @@ import (
 
 func RunMigrations(database *gorm.DB) error {
 	types := map[string]any{
-		"task": &timelog.Task{},
+		"task":  &timelog.Task{},
+		"group": &timelog.Group{},
 	}
 	typeCount := len(types)
 	timber.Infof("running migrations (%d total)", typeCount)
