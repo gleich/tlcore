@@ -5,7 +5,7 @@ import "time"
 type Task struct {
 	Title       string  `json:"title"`
 	Description *string `json:"description"`
-	Group       string  `json:"group"`
+	// Group       string  `json:"group"`
 
 	Deleted bool `json:"deleted"`
 
