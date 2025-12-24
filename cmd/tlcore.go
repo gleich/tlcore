@@ -4,11 +4,12 @@ import (
 	"errors"
 	"io/fs"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/joho/godotenv"
 	"go.mattglei.ch/timber"
-	"go.mattglei.ch/tlcore/internal/api/tasks"
+	"go.mattglei.ch/tlcore/internal/api"
 	"go.mattglei.ch/tlcore/internal/db"
 	"go.mattglei.ch/tlcore/internal/middleware"
 )
@@ -33,18 +34,27 @@ func main() {
 	}
 
 	// connect to database
-	_, err = db.Connect()
+	database, err := db.Connect()
 	if err != nil {
 		timber.Fatal(err, "failed to connect to postgres database")
 	}
 	timber.Done("connected to postgres database")
 
+	// run migrations (only in development)
+	if os.Getenv("RUN_MIGRATIONS") == "true" {
+		err = db.RunMigrations(database)
+		if err != nil {
+			timber.Fatal(err, "failed to run dev migrations")
+		}
+	}
+
 	// register endpoints with mux
+	handler := api.Handler{DB: database}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "https://github.com/gleich/tlcore", http.StatusPermanentRedirect)
 	})
-	mux.HandleFunc("POST /task", tasks.Create)
+	mux.HandleFunc("POST /task", http.HandlerFunc(handler.CreateTask))
 	loggingMux := middleware.Logging(mux)
 
 	timber.Info("starting server")
