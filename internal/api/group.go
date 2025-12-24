@@ -9,7 +9,7 @@ import (
 
 func (h *Handler) CreateGroup(w http.ResponseWriter, r *http.Request) {
 	var payload struct {
-		Name string `json:"string"`
+		Name string `json:"name"`
 	}
 
 	err := json.NewDecoder(r.Body).Decode(&payload)
@@ -31,4 +31,8 @@ func (h *Handler) CreateGroup(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusCreated)
+}
+
+func (h *Handler) DeleteGroup(w http.ResponseWriter, r *http.Request) {
+	h.deleteByID(w, r, "group", &timelog.Group{})
 }

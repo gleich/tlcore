@@ -55,7 +55,9 @@ func main() {
 		http.Redirect(w, r, "https://github.com/gleich/tlcore", http.StatusPermanentRedirect)
 	})
 	mux.HandleFunc("POST /task", http.HandlerFunc(handler.CreateTask))
+	mux.HandleFunc("POST /group", http.HandlerFunc(handler.CreateGroup))
 	mux.HandleFunc("DELETE /task/{id}", http.HandlerFunc(handler.DeleteTask))
+	mux.HandleFunc("DELETE /group/{id}", http.HandlerFunc(handler.DeleteGroup))
 	loggingMux := middleware.Logging(mux)
 
 	timber.Info("starting server")

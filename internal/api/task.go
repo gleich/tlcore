@@ -3,7 +3,6 @@ package api
 import (
 	"encoding/json"
 	"net/http"
-	"strconv"
 	"time"
 
 	"go.mattglei.ch/tlcore/pkg/timelog"
@@ -13,7 +12,7 @@ func (h *Handler) CreateTask(w http.ResponseWriter, r *http.Request) {
 	var payload struct {
 		Title       string  `json:"title"`
 		Description *string `json:"description"`
-		GroupID     uint    `json:"group_id"`
+		GroupID     *uint   `json:"group_id"`
 
 		DueTime *time.Time `json:"due_time"`
 	}
@@ -28,11 +27,15 @@ func (h *Handler) CreateTask(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "title is required", http.StatusBadRequest)
 		return
 	}
+	if payload.GroupID == nil {
+		http.Error(w, "group id is required", http.StatusBadRequest)
+		return
+	}
 
 	task := timelog.Task{
 		Title:       payload.Title,
 		Description: payload.Description,
-		GroupID:     payload.GroupID,
+		GroupID:     *payload.GroupID,
 		DueTime:     payload.DueTime,
 		CreatedTime: time.Now(),
 	}
@@ -47,22 +50,5 @@ func (h *Handler) CreateTask(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) DeleteTask(w http.ResponseWriter, r *http.Request) {
-	idStr := r.PathValue("id")
-	if idStr == "" {
-		http.Error(w, "missing task id", http.StatusBadRequest)
-		return
-	}
-
-	id, err := strconv.ParseUint(idStr, 10, 64)
-	if err != nil {
-		http.Error(w, "invalid task id", http.StatusBadRequest)
-		return
-	}
-
-	err = h.DB.WithContext(r.Context()).Delete(&timelog.Task{}, id).Error
-	if err != nil {
-		internalError(w, err, "failed to delete task")
-		return
-	}
-	w.WriteHeader(http.StatusNoContent)
+	h.deleteByID(w, r, "task", &timelog.Task{})
 }
